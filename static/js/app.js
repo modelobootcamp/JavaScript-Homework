@@ -1,46 +1,52 @@
-// Assign the data from `data.js` to a descriptive variable
-var people = data;
-// use d3 to select the table
-d3.select("table")
+// from data.js
+var tableData = data;
 
-// Select the submit button
-var submit = d3.select("#submit");
+// YOUR CODE HERE!
 
-submit.on("click", function() {
+// Get references to the tbody element, input field and button
+var $tbody = document.querySelector("tbody");
+var $dateInput = document.querySelector("#datetime");
+var $searchBtn = document.querySelector("#filter-btn");
 
-  // Prevent the page from refreshing
-  d3.event.preventDefault();
+// Add an event listener to the searchButton, call handleSearchButtonClick when clicked
+$searchBtn.addEventListener("click", handleSearchButtonClick);
 
-  // Select the input element and get the raw HTML node
-  var inputElement = d3.select("#patient-form-input");
+// renderTable renders the tableData to the tbody
+function renderTable() {
+  $tbody.innerHTML = "";
+  for (var i = 0; i < tableData.length; i++) {
+    // Get get the current data object and its fields
+    var data = tableData[i];
+    var fields = Object.keys(data);
+    // Create a new row in the tbody, set the index to be i + startingIndex
+    var $row = $tbody.insertRow(i);
+    for (var j = 0; j < fields.length; j++) {
+      var field = fields[j];
+      var $cell = $row.insertCell(j);
+      $cell.innerText = data[field];
+    }
+  }
+}
 
-  // Get the value property of the input element
-  var inputValue = inputElement.property("value");
+function handleSearchButtonClick(event) {
+  // prevent page from refreshing
+  event.preventDefault();
 
-  console.log(inputValue);
-  console.log(people);table
+  var filterDate = $dateInput.value.trim();
+  if (filterDate != "") {
+    tableData = data.filter(function (data) {
+      var dataDate = data.datetime;
+      return dataDate === filterDate;
+    });
+};
+renderTable();
+  }
+function resetData() {
+  tableData = data;
+  $dateInput.value = "";
 
-  var filteredData = people.filter(person => person.bloodType === inputValue);
+  renderTable();
+}
 
-  console.log(filteredData);
-
-  // BONUS: Calculate summary statistics for the age field of the filtered data
-
-  // First, create an array with just the age values
-  var ages = filteredData.map(person => person.age);
-
-  // Next, use math.js to calculate the mean, median, mode, var, and std of the ages
-  var mean = math.mean(ages);
-  var median = math.median(ages);
-  var mode = math.mode(ages);
-  var variance = math.var(ages);
-  var standardDeviation = math.std(ages);
-
-  // Finally, add the summary stats to the `ul` tag
-  d3.select(".summary")
-    .append("li").text(`Mean: ${mean}`)
-    .append("li").text(`Median: ${median}`)
-    .append("li").text(`Mode: ${mode}`)
-    .append("li").text(`Variance: ${variance}`)
-    .append("li").text(`Standard Deviation: ${standardDeviation}`);
-});
+// Render the table for the first time on page load
+renderTable();
